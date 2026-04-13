@@ -27,6 +27,25 @@ function load(key, fallback) {
 }
 function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
+function exportToExcel(leads) {
+  const headers = ["登入日期", "中文姓名", "英文姓名", "家長電話", "課程", "來源", "負責顧問", "分配時間"];
+  const rows = leads.map(l => [
+    l.date, l.nameCN || "", l.nameEN || "", l.phone,
+    l.course || "", l.source || "", l.counselor, l.createdAt || ""
+  ]);
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(","))
+    .join("\n");
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `潛在學生名單_${new Date().toLocaleDateString("zh-TW").replace(/\//g, "-")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function openOutlook(email, counselorName, lead) {
   if (!email) return false;
   const name = lead.nameCN || lead.nameEN || "（未填姓名）";
@@ -343,6 +362,9 @@ export default function App() {
               <div style={{ fontSize: 14, color: "#888" }}>共 <strong style={{ color: "#1A1A2E" }}>{data.leads.length}</strong> 筆資料
                 {!isAdmin && <span style={{ marginLeft: 8, fontSize: 12, color: "#BBB" }}>（唯讀）</span>}
               </div>
+              {data.leads.length > 0 && (
+                <button onClick={() => exportToExcel(data.leads)} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #2DA84E", background: "transparent", color: "#2DA84E", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>⬇ 匯出 Excel</button>
+              )}
               {isAdmin && data.leads.length > 0 && (
                 <button onClick={() => { if(window.confirm("確定要清除所有資料？")) { setData({ leads: [], nextIndex: 0 }); showToast("已清除", "error"); }}} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #F00A", background: "transparent", color: "#C00", cursor: "pointer", fontSize: 12 }}>清除全部</button>
               )}
