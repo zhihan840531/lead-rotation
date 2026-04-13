@@ -362,7 +362,7 @@ export default function App() {
               <div style={{ fontSize: 14, color: "#888" }}>共 <strong style={{ color: "#1A1A2E" }}>{data.leads.length}</strong> 筆資料
                 {!isAdmin && <span style={{ marginLeft: 8, fontSize: 12, color: "#BBB" }}>（唯讀）</span>}
               </div>
-              {data.leads.length > 0 && (
+              {isAdmin && data.leads.length > 0 && (
                 <button onClick={() => exportToExcel(data.leads)} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #2DA84E", background: "transparent", color: "#2DA84E", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>⬇ 匯出 Excel</button>
               )}
               {isAdmin && data.leads.length > 0 && (
